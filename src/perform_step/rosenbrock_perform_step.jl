@@ -260,7 +260,7 @@ end
 
 function initialize!(integrator, cache::Union{Rosenbrock33ConstantCache,
                                               Rosenbrock34ConstantCache,
-                                              Rosenbrock4ConstantCache,
+                                              Rodas4ConstantCache,
                                               Rosenbrock5ConstantCache})
   integrator.kshortsize = 2
   integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
@@ -275,7 +275,7 @@ end
 
 function initialize!(integrator, cache::Union{Rosenbrock33Cache,
                                               Rosenbrock34Cache,
-                                              Rosenbrock4Cache,
+                                              Rodas4Cache,
                                               Rosenbrock5Cache})
   integrator.kshortsize = 2
   @unpack fsalfirst,fsallast = cache
@@ -612,13 +612,13 @@ end
 
 #### Rodas4 type method
 
-function initialize!(integrator, cache::Rodas4ConstantCache)
-  integrator.kshortsize = 2
-  integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
-  # Avoid undefined entries if k is an array of arrays
-  integrator.k[1] = zero(integrator.u)
-  integrator.k[2] = zero(integrator.u)
-end
+# function initialize!(integrator, cache::Rodas4ConstantCache)
+#   integrator.kshortsize = 2
+#   integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
+#   # Avoid undefined entries if k is an array of arrays
+#   integrator.k[1] = zero(integrator.u)
+#   integrator.k[2] = zero(integrator.u)
+# end
 
 @muladd function perform_step!(integrator, cache::Rodas4ConstantCache, repeat_step=false)
   @unpack t,dt,uprev,u,f,p = integrator
@@ -736,16 +736,17 @@ end
     integrator.k[1] =  h21*k1 + h22*k2 + h23*k3 + h24*k4 + h25*k5
     integrator.k[2] =  h31*k1 + h32*k2 + h33*k3 + h34*k4 + h35*k5
   end
+  integrator.fsallast = du
   integrator.u = u
 end
 
 
-function initialize!(integrator, cache::Rodas4Cache)
-  integrator.kshortsize = 2
-  @unpack dense1,dense2 = cache
-  resize!(integrator.k, integrator.kshortsize)
-  integrator.k .= [dense1,dense2]
-end
+# function initialize!(integrator, cache::Rodas4Cache)
+#   integrator.kshortsize = 2
+#   @unpack dense1,dense2 = cache
+#   resize!(integrator.k, integrator.kshortsize)
+#   integrator.k .= [dense1,dense2]
+# end
 
 @muladd function perform_step!(integrator, cache::Rodas4Cache, repeat_step=false)
   @unpack t,dt,uprev,u,f,p = integrator
